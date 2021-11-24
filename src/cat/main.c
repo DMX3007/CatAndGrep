@@ -3,55 +3,58 @@
 #include <string.h>
 #include "s21_cat.h"
 
-void openfile();
+// void openfile();
 
 int main(int argc, char **argv) {
     
-    int i = 1, array_of_flags[1024] = {0}, res = 0;
+    int i = 1, res = 0;
+    char buffer[10] = {'\0'};
     while (i < argc) {
-        res = is_it_flag(argv[i]);
-        array_of_flags[i] = res; 
+        res = is_it_flag(argv+i, buffer);
+        i++;
     }
-    
-    // argv[num];
-    // start_processing();
-    // return 0;
+    return 0;
 }
 
-void start_processing(char *string, int flag) {
-    // if (no_flags) {
-    //     printing_to_output(string);
-   /* } else*/ if (flag) {
-        define_formate();
-        printing_in_file();
-    }
-}
+//     // argv[num];
+//     // start_processing();
+//     // return 0;
+// }
 
-void define_formate(char *original_string, char *flags_string, int flag) {
-    if (flag == 'e') add_dollars(original_string);
-    // if (flag == 'n') add_numbers();
-    // if (flag == 'b') add_numbers(), remove_blanc();
-    // if (flag == 't') add_stick();
-}
+// void start_processing(char *string, int flag) {
+//     // if (no_flags) {
+//     //     printing_to_output(string);
+//    /* } else*/ if (flag) {
+//         define_formate();
+//         printing_in_file();
+//     }
+// }
 
-void add_dollars(char *original_string) {
-    char *buffer = "$";
-    while (original_string != '\n') original_string++;
-    strcat(original_string, buffer);
-}
+// void define_formate(char *original_string, char *flags_string, int flag) {
+//     if (flag == 'e') add_dollars(original_string);
+//     // if (flag == 'n') add_numbers();
+//     // if (flag == 'b') add_numbers(), remove_blanc();
+//     // if (flag == 't') add_stick();
+// }
 
-void printing_to_output(char *string) {
-    FILE *file = NULL;
-    file = fopen(string, "r");
-    int i = 0;
-        while (i != EOF) {
-            putc(i, stdout);
-            i = getc(file);
-    }
-}
+// void add_dollars(char *original_string) {
+//     char *buffer = "$";
+//     while (original_string != '\n') original_string++;
+//     strcat(original_string, buffer);
+// }
 
-void loop() {
-    while (argv) {
-        if (is_it_flag(argv);
-    }
-}
+// void printing_to_output(char *string) {
+//     FILE *file = NULL;
+//     file = fopen(string, "r");
+//     int i = 0;
+//         while (i != EOF) {
+//             putc(i, stdout);
+//             i = getc(file);
+//     }
+// }
+
+// void loop() {
+//     while (argv) {
+//         if (is_it_flag(argv);
+//     }
+// }
