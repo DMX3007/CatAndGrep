@@ -19,19 +19,20 @@ struct fields {
 
 void init_struct(struct fields *flags);
 void take_flag(char option, struct fields *flags);
-int take_file(char** string_where_search_file);
+int take_file(char** string_where_search_file, char* name_file);
 
 int main(int argc, char **argv) {
     char option = '0';
-    int option_index = 0;
+    int option_index = 0, counter = 0;
+    char *ptr = NULL;
     struct fields flags;
     init_struct(&flags);
     while ((option = getopt_long(argc, argv, "benstv", long_option, &option_index)) != -1) {
         take_flag(option, &flags);
     }
-    while ((option = take_file(argv + 1)) != -1) {
+    while ((option = take_file(argv + 1, ptr)) != -1) {
     }
-    
+    printf("%s", ptr);
 }
 
 void init_struct(struct fields *flags) {
@@ -69,18 +70,17 @@ void printing_to_output(char *file_name) {
     }
 }
 
-int take_file(char** string_where_search_file) {
+int take_file(char** string_where_search_file, char* ptr) {
     FILE *file;
-    int i = 0;
-    char * ptr;
+    char * pP;
     while (*string_where_search_file) {
-        if (fopen((*(string_where_search_file)) + i, "r") != NULL) {
-            printf("We find it");
+        if (fopen(*(string_where_search_file), "r") != NULL) {
+            printf("We find it\n");
             fclose(file);
         } else {
             printf("NO");
         }
-        ptr = *string_where_search_file++;
+        pP = *string_where_search_file++;
     }
     return -1;
 }
