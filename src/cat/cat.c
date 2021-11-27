@@ -25,11 +25,12 @@ char *take_file(char **string_where_search_file, char *buffer);
 void printing_to_output(char *file_name);
 
 int main(int argc, char **argv) {
-    int option_index, option = 0;
+    int option_index, option = 0, raise = 0;
     struct fields flags;
     char ch, previous = '\0';
     FILE *file;
     int common_count = 0;
+    init_struct(&flags);
     while ((option = getopt_long(argc, argv, "benstv", long_option,
                                  &option_index)) != -1) {
         take_flag(option, &flags);
@@ -48,6 +49,38 @@ int main(int argc, char **argv) {
                             }
                             previous = ch;
                         }
+                        if (flags.b) {
+                            if (previous == '\0' || previous == '\n') {
+                                common_count++;
+                                printf("%6d  ", common_count);
+                                previous = ch;
+                            }
+                        }
+                        if (flags.t) {
+                            if (ch == '\t') {
+                                printf("^I");
+                                ch = '\0';
+                            }
+                        }
+                        if (flags.e) {
+                            if (ch == '\n') {
+                                printf("$");
+                            }
+                        }
+
+                        if (flags.s) {
+                            if ((ch == '\n') && (raise > 0)) {
+                                ch = '\0';
+                            }
+                        }
+
+                        if ((ch == '\n') && (previous == '\n')) {
+                            raise++;
+                        } else {
+                            raise = 0;
+                        }
+
+                        previous = ch;
                         putc(ch, stdout);
                     }
                 }
