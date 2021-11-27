@@ -1,12 +1,13 @@
-#include <stdio.h>
 #include <getopt.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-static struct option long_option[] = {
-    {"number-nonblank", 0, 0, 'b'}, 
-    {"number", 0,0, 'n'},
-    {"squeeze-blank", 0, 0, 's'},
-    {0,0,0,0}
-};
+static struct option long_option[] = {{"number-nonblank", 0, 0, 'b'},
+                                      {"number", 0, 0, 'n'},
+                                      {"squeeze-blank", 0, 0, 's'},
+                                      {0, 0, 0, 0}};
 
 struct fields {
     int b;
@@ -14,25 +15,45 @@ struct fields {
     int n;
     int s;
     int t;
-    int v;  
+    int v;
+    int sum;
 };
 
 void init_struct(struct fields *flags);
 void take_flag(char option, struct fields *flags);
-int take_file(char** string_where_search_file, char* name_file);
+char *take_file(char **string_where_search_file, char *buffer);
+void printing_to_output(char *file_name);
 
 int main(int argc, char **argv) {
-    char option = '0';
-    int option_index = 0, counter = 0;
-    char *ptr = NULL;
+    int option_index, option = 0;
     struct fields flags;
-    init_struct(&flags);
-    while ((option = getopt_long(argc, argv, "benstv", long_option, &option_index)) != -1) {
+    char ch, previous = '\0';
+    FILE *file;
+    int common_count = 0;
+    while ((option = getopt_long(argc, argv, "benstv", long_option,
+                                 &option_index)) != -1) {
         take_flag(option, &flags);
     }
-    while ((option = take_file(argv + 1, ptr)) != -1) {
+    if (argc > 1) {
+        for (int i = 0; argv++ && (i < argc - 1); i++) {
+            if ((strlen((*argv)) > 2) && (**(argv) != '-')) {
+                if ((file = fopen(*argv, "r")) == NULL) {
+                    printf("s21_cat: %s: No such file or directory", *argv);
+                } else {
+                    while ((ch = getc(file)) != EOF) {
+                        if (flags.n) {
+                            if (previous == '\0' || previous == '\n') {
+                                common_count++;
+                                printf("%6d  ", common_count);
+                            }
+                            previous = ch;
+                        }
+                        putc(ch, stdout);
+                    }
+                }
+            }
+        }
     }
-    printf("%s", ptr);
 }
 
 void init_struct(struct fields *flags) {
@@ -42,45 +63,27 @@ void init_struct(struct fields *flags) {
     flags->s = 0;
     flags->t = 0;
     flags->v = 0;
+    flags->sum = 0;
 }
 
 void take_flag(char option, struct fields *flags) {
-    if(option == 'b') {
+    if (option == 'b') {
         flags->b = option;
+        flags->sum += 1;
     } else if (option == 'e') {
         flags->e = option;
+        flags->sum += 1;
     } else if (option == 'n') {
         flags->n = option;
+        flags->sum += 1;
     } else if (option == 's') {
         flags->s = option;
+        flags->sum += 1;
     } else if (option == 't') {
         flags->t = option;
+        flags->sum += 1;
     } else if (option == 'v') {
-        flags->v = option;   
+        flags->v = option;
+        flags->sum += 1;
     }
-}
-
-void printing_to_output(char *file_name) {
-    FILE *file = NULL;
-    file = fopen(file_name, "r");
-    int i = 0;
-        while (i != EOF) {
-            putc(i, stdout);
-            i = getc(file);
-    }
-}
-
-int take_file(char** string_where_search_file, char* ptr) {
-    FILE *file;
-    char * pP;
-    while (*string_where_search_file) {
-        if (fopen(*(string_where_search_file), "r") != NULL) {
-            printf("We find it\n");
-            fclose(file);
-        } else {
-            printf("NO");
-        }
-        pP = *string_where_search_file++;
-    }
-    return -1;
 }
