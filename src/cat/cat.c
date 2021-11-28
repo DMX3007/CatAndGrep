@@ -45,14 +45,15 @@ int main(int argc, char **argv) {
                         if (flags.n) {
                             if (previous == '\0' || previous == '\n') {
                                 common_count++;
-                                printf("%6d  ", common_count);
+                                printf("%6d\t", common_count);
                             }
                             previous = ch;
                         }
                         if (flags.b) {
-                            if (previous == '\0' || previous == '\n') {
+                            if ((previous == '\0' || previous == '\n') &&
+                                (ch != '\n')) {
                                 common_count++;
-                                printf("%6d  ", common_count);
+                                printf("%6d\t", common_count);
                                 previous = ch;
                             }
                         }
@@ -62,26 +63,28 @@ int main(int argc, char **argv) {
                                 ch = '\0';
                             }
                         }
-                        if (flags.e) {
-                            if (ch == '\n') {
-                                printf("$");
-                            }
-                        }
 
                         if (flags.s) {
                             if ((ch == '\n') && (raise > 0)) {
-                                ch = '\0';
+                            }
+                            if ((ch == '\n') && (previous == '\n')) {
+                                raise++;
+                            } else if (ch != '\n') {
+                                raise = 0;
                             }
                         }
-
-                        if ((ch == '\n') && (previous == '\n')) {
-                            raise++;
-                        } else {
-                            raise = 0;
-                        }
-
                         previous = ch;
-                        putc(ch, stdout);
+                        if (raise >= 2) {
+                            // ch = "";
+                            // putc(ch, stdout);
+                        } else {
+                            if (flags.e) {
+                                if (ch == '\n') {
+                                    printf("$");
+                                }
+                            }
+                            putc(ch, stdout);
+                        }
                     }
                 }
             }
