@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
     FILE *file;
     int common_count = 0;
     init_struct(&flags);
-    while ((option = getopt_long(argc, argv, "benstv", long_option,
+    while ((option = getopt_long(argc, argv, "beEnstv", long_option,
                                  &option_index)) != -1) {
         take_flag(option, &flags);
     }
@@ -40,6 +40,7 @@ int main(int argc, char **argv) {
             if ((strlen((*argv)) > 2) && (**(argv) != '-')) {
                 if ((file = fopen(*argv, "r")) == NULL) {
                     printf("s21_cat: %s: No such file or directory", *argv);
+                    fclose(file);
                 } else {
                     while ((ch = getc(file)) != EOF) {
                         if (flags.n) {
@@ -63,20 +64,28 @@ int main(int argc, char **argv) {
                                 ch = '\0';
                             }
                         }
-
                         if (flags.s) {
-                            if ((ch == '\n') && (raise > 0)) {
-                            }
                             if ((ch == '\n') && (previous == '\n')) {
                                 raise++;
                             } else if (ch != '\n') {
                                 raise = 0;
                             }
                         }
+                        if (flags.v) {
+                            if (((ch >= 0 && ch <= 31) || ch == 127) &&
+                                (ch != 10 && ch != 9)) {
+                                if (ch == 127) {
+                                    printf("%c", 127);
+                                    ch = '\0';
+                                } else {
+                                    printf("%c", ch + 64);
+                                    ch = '\0';
+                                }
+                            }
+                        }
                         previous = ch;
                         if (raise >= 2) {
-                            // ch = "";
-                            // putc(ch, stdout);
+                            ;
                         } else {
                             if (flags.e) {
                                 if (ch == '\n') {
@@ -89,6 +98,7 @@ int main(int argc, char **argv) {
                 }
             }
         }
+        fclose(file);
     }
 }
 
