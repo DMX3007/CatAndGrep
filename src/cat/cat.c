@@ -23,7 +23,6 @@ void init_struct(struct fields *flags);
 void take_flag(char option, struct fields *flags);
 char *take_file(char **string_where_search_file, char *buffer);
 void printing_to_output(char *file_name);
-void checkEOF(char ch, char previous, int common_count);
 
 int main(int argc, char **argv) {
     int option_index, option = 0,
@@ -137,15 +136,4 @@ void take_flag(char option, struct fields *flags) {
     } else if (option == 'T') {
         flags->t = option;
     }
-}
-
-void checkEOF(char ch, char previous, int common_count) {
-    if (ch == EOF)
-        if (previous == '\n') {
-            ;
-        } else {
-            // common_count++;
-            printf("\n");
-            // printf("%6d\t", common_count);
-        }
 }
