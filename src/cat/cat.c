@@ -23,9 +23,11 @@ void init_struct(struct fields *flags);
 void take_flag(char option, struct fields *flags);
 char *take_file(char **string_where_search_file, char *buffer);
 void printing_to_output(char *file_name);
+void checkEOF(char ch, char previous, int common_count);
 
 int main(int argc, char **argv) {
-    int option_index, option = 0, raise = 0;
+    int option_index, option = 0,
+                      raise = 0; /*, number_of_files = 0, num_old = 0;*/
     struct fields flags;
     char ch, previous = '\0';
     FILE *file;
@@ -42,6 +44,10 @@ int main(int argc, char **argv) {
                     printf("s21_cat: %s: No such file or directory", *argv);
                     fclose(file);
                 } else {
+                    // number_of_files++;
+                    // if (num_old != number_of_files) {
+                    //     printf("\n");
+                    // }
                     while ((ch = getc(file)) != EOF) {
                         if (flags.n) {
                             if (previous == '\0' || previous == '\n') {
@@ -75,11 +81,9 @@ int main(int argc, char **argv) {
                             if (((ch >= 0 && ch <= 31) || ch == 127) &&
                                 (ch != 10 && ch != 9)) {
                                 if (ch == 127) {
-                                    printf("%c", 127);
-                                    ch = '\0';
+                                    printf("^?");
                                 } else {
-                                    printf("%c", ch + 64);
-                                    ch = '\0';
+                                    printf("^%c", ch + 64);
                                 }
                             }
                         }
@@ -95,6 +99,7 @@ int main(int argc, char **argv) {
                             putc(ch, stdout);
                         }
                     }
+                    // num_old = number_of_files;
                 }
             }
         }
@@ -115,21 +120,32 @@ void init_struct(struct fields *flags) {
 void take_flag(char option, struct fields *flags) {
     if (option == 'b') {
         flags->b = option;
-        flags->sum += 1;
     } else if (option == 'e') {
+        flags->v = 1;
         flags->e = option;
-        flags->sum += 1;
     } else if (option == 'n') {
         flags->n = option;
-        flags->sum += 1;
     } else if (option == 's') {
         flags->s = option;
-        flags->sum += 1;
     } else if (option == 't') {
+        flags->v = 1;
         flags->t = option;
-        flags->sum += 1;
     } else if (option == 'v') {
         flags->v = option;
-        flags->sum += 1;
+    } else if (option == 'E') {
+        flags->e = option;
+    } else if (option == 'T') {
+        flags->t = option;
     }
+}
+
+void checkEOF(char ch, char previous, int common_count) {
+    if (ch == EOF)
+        if (previous == '\n') {
+            ;
+        } else {
+            // common_count++;
+            printf("\n");
+            // printf("%6d\t", common_count);
+        }
 }
