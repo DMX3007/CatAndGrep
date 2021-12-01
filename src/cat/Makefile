@@ -1,16 +1,13 @@
-CC =  gcc
-FLAGS = -g 
+CC = gcc
+FLAGS = -Werror -Wextra -Wall
 
-all: main is_it
+all: s21_cat
 
-main: main.o is_it.o
-	$(CC) $(FLAGS) $^ -o $@
-main.o: main.c
-	$(CC) -c $(FLAGS) $< -o $@.o
-is_it.o: is_it.c
-	$(CC) -c $(FLAGS) $< -o $@.o
-clean: 
-	rm -rf *.o main *.dSYM testing cat a.out
-rebuild:
-	$(MAKE)clean
-	$(MAKE)all
+s21_cat: s21_cat.o
+	$(CC) $(FLAGS) $< -o $@
+
+s21_cat.o: cat.c
+	$(CC) -c $(FLAGS) $< -o $@
+
+clean:
+	rm -rf *.o
