@@ -34,8 +34,12 @@ int main(int argc, char **argv) {
     init_struct(&flags);
     while ((option = getopt_long(argc, argv, "beEnstv", long_option,
                                  &option_index)) != -1) {
+        // printf("%d\n", optind);
+        // printf("%s\n", optarg);
+
         take_flag(option, &flags);
     }
+    // printf("%s\n", optarg);
     if (argc > 1) {
         for (int i = 0; argv++ && (i < argc - 1); i++) {
             if ((strlen((*argv)) > 2) && (**(argv) != '-')) {
@@ -48,7 +52,18 @@ int main(int argc, char **argv) {
                     //     printf("\n");
                     // }
                     while ((ch = getc(file)) != EOF) {
-                        if (flags.n) {
+                        if (flags.v) {
+                            if ((ch >= 0 && ch <= 31 && ch != 10 && ch != 9) ||
+                                ch == 127) {
+                                if (ch == 127) {
+                                    printf("^?");
+                                } else {
+                                    printf("^%c", ch + 64);
+                                }
+                                ch = '\0';
+                            }
+                        }
+                        if (flags.n && !flags.b) {
                             if (previous == '\0' || previous == '\n') {
                                 common_count++;
                                 printf("%6d\t", common_count);
@@ -63,12 +78,6 @@ int main(int argc, char **argv) {
                                 previous = ch;
                             }
                         }
-                        if (flags.t) {
-                            if (ch == '\t') {
-                                printf("^I");
-                                ch = '\0';
-                            }
-                        }
                         if (flags.s) {
                             if ((ch == '\n') && (previous == '\n')) {
                                 raise++;
@@ -76,14 +85,10 @@ int main(int argc, char **argv) {
                                 raise = 0;
                             }
                         }
-                        if (flags.v) {
-                            if (((ch >= 0 && ch <= 31) || ch == 127) &&
-                                (ch != 10 && ch != 9)) {
-                                if (ch == 127) {
-                                    printf("^?");
-                                } else {
-                                    printf("^%c", ch + 64);
-                                }
+                        if (flags.t) {
+                            if (ch == '\t') {
+                                printf("^I");
+                                ch = '\0';
                             }
                         }
                         previous = ch;
@@ -104,6 +109,7 @@ int main(int argc, char **argv) {
         }
         fclose(file);
     }
+    return 0;
 }
 
 void init_struct(struct fields *flags) {
