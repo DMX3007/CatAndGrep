@@ -21,25 +21,26 @@ struct fields {
 
 void init_struct(struct fields *flags);
 void take_flag(char option, struct fields *flags);
-char *take_file(char **string_where_search_file, char *buffer);
-void printing_to_output(char *file_name);
+
+void s_flag(char ch, char previous, int *raise);
+void n_flag(char ch, int *common_count, char previous);
+void t_flag(char ch);
+void b_flag(char ch, char previous, int *common_count);
+void e_flag(char ch);
+void v_flag(char ch);
+void output(char ch);
 
 int main(int argc, char **argv) {
-    int option_index, option = 0,
-                      raise = 0; /*, number_of_files = 0, num_old = 0;*/
+    int option_index, option = 0, new = 1, raise = 0;
     struct fields flags;
     char ch, previous = '\0';
     FILE *file;
-    int common_count = 0;
+    int common_count = 1;
     init_struct(&flags);
     while ((option = getopt_long(argc, argv, "beEnstv", long_option,
                                  &option_index)) != -1) {
-        // printf("%d\n", optind);
-        // printf("%s\n", optarg);
-
         take_flag(option, &flags);
     }
-    // printf("%s\n", optarg);
     if (argc > 1) {
         for (int i = 0; argv++ && (i < argc - 1); i++) {
             if ((strlen((*argv)) > 2) && (**(argv) != '-')) {
@@ -47,67 +48,37 @@ int main(int argc, char **argv) {
                     printf("s21_cat: %s: No such file or directory", *argv);
                     fclose(file);
                 } else {
-                    // number_of_files++;
-                    // if (num_old != number_of_files) {
-                    //     printf("\n");
-                    // }
                     while ((ch = getc(file)) != EOF) {
-                        if (flags.v) {
-                            if ((ch >= 0 && ch <= 31 && ch != 10 && ch != 9) ||
-                                ch == 127) {
-                                if (ch == 127) {
-                                    printf("^?");
-                                } else {
-                                    printf("^%c", ch + 64);
-                                }
-                                ch = '\0';
-                            }
+                        previous = ch;
+                        if (flags.s) {
+                            s_flag(ch, previous, &raise);
+                            output(ch);
                         }
                         if (flags.n && !flags.b) {
-                            if (previous == '\0' || previous == '\n') {
-                                common_count++;
-                                printf("%6d\t", common_count);
-                            }
-                            previous = ch;
-                        }
-                        if (flags.b) {
-                            if ((previous == '\0' || previous == '\n') &&
-                                (ch != '\n')) {
-                                common_count++;
-                                printf("%6d\t", common_count);
-                                previous = ch;
-                            }
-                        }
-                        if (flags.s) {
-                            if ((ch == '\n') && (previous == '\n')) {
-                                raise++;
-                            } else if (ch != '\n') {
-                                raise = 0;
-                            }
+                            n_flag(ch, &common_count, previous);
+                            output(ch);
                         }
                         if (flags.t) {
-                            if (ch == '\t') {
-                                printf("^I");
-                                ch = '\0';
-                            }
+                            t_flag(ch);
+                            output(ch);
                         }
-                        previous = ch;
-                        if (raise >= 2) {
-                            ;
-                        } else {
-                            if (flags.e) {
-                                if (ch == '\n') {
-                                    printf("$");
-                                }
-                            }
-                            putc(ch, stdout);
+                        if (flags.b) {
+                            b_flag(ch, previous, common_count);
+                            output(ch);
+                        }
+                        if (flags.e) {
+                            e_flag(ch);
+                            output(ch);
+                        }
+                        if (flags.v) {
+                            v_flag(ch);
+                            output(ch);
                         }
                     }
-                    // num_old = number_of_files;
+                    fclose(file);
                 }
             }
         }
-        fclose(file);
     }
     return 0;
 }
@@ -143,3 +114,44 @@ void take_flag(char option, struct fields *flags) {
         flags->t = option;
     }
 }
+
+void s_flag(char ch, char previous, int *raise) {
+    if ((ch == '\n') && (previous == '\n')) {
+        *raise = 1;
+        if (ch != '\n') {
+            *raise = 0;
+        }
+    }
+}
+
+void n_flag(char ch, int *common_count, char previous) {
+    if (previous == '\n' || ch == '\n') {
+        printf("%6d\t", *(++common_count));
+    }
+}
+
+void t_flag(char ch) {
+    if (ch == '\t') {
+        printf("^I");
+    }
+}
+
+void b_flag(char ch, char previous, int *common_count) {
+    if (ch == '\n' && previous == '\n') {
+    } else
+        printf("%6d\t", *(++common_count));
+}
+
+void e_flag(char ch) {
+    if (ch == '\n') {
+        printf('$');
+    }
+}
+
+void v_flag(char ch) {
+    if (ch >= 0 && ch <= 31) {
+        printf("^");
+    }
+}
+
+void output(char ch) { putc(ch, stdout); }
