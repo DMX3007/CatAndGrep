@@ -22,7 +22,7 @@ struct fields {
 void init_struct(struct fields *flags);
 void take_flag(char option, struct fields *flags);
 
-void s_flag(char ch, char previous, int *raise);
+int s_flag(char ch, char previous, int *raise);
 void n_flag(char ch, int *common_count, char previous);
 void t_flag(char ch);
 void b_flag(char ch, char previous, int *common_count);
@@ -54,7 +54,6 @@ int main(int argc, char **argv) {
                         }
                         if (flags.n && !flags.b) {
                             n_flag(ch, &common_count, previous);
-                            output(ch);
                         }
                         // if (flags.t) {
                         //     t_flag(ch);
@@ -114,21 +113,23 @@ void take_flag(char option, struct fields *flags) {
     }
 }
 
-void s_flag(char ch, char previous, int *raise) {
+int s_flag(char ch, char previous, int *raise) {
     if ((ch == '\n') && (previous == '\n')) {
         *raise += 1;
     }
     if (ch != '\n') {
         *raise = 0;
     }
-    if (*raise < 2) {
-        output(ch);
+    if (raise > 1) {
+        return 0;
     }
 }
 
 void n_flag(char ch, int *common_count, char previous) {
-    if (previous == '\n' || ch == '\n') {
-        printf("%6d\t", *(++common_count));
+    int static firstcall = 1;
+    if (previous == '\n' || ch == '\n' || firstcall) {
+        printf("%6d\t", ++(*common_count));
+        firstcall = 0;
     }
 }
 
