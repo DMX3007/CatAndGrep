@@ -49,31 +49,30 @@ int main(int argc, char **argv) {
                     fclose(file);
                 } else {
                     while ((ch = getc(file)) != EOF) {
-                        previous = ch;
                         if (flags.s) {
                             s_flag(ch, previous, &raise);
-                            output(ch);
                         }
                         if (flags.n && !flags.b) {
                             n_flag(ch, &common_count, previous);
                             output(ch);
                         }
-                        if (flags.t) {
-                            t_flag(ch);
-                            output(ch);
-                        }
-                        if (flags.b) {
-                            b_flag(ch, previous, common_count);
-                            output(ch);
-                        }
-                        if (flags.e) {
-                            e_flag(ch);
-                            output(ch);
-                        }
-                        if (flags.v) {
-                            v_flag(ch);
-                            output(ch);
-                        }
+                        // if (flags.t) {
+                        //     t_flag(ch);
+                        //     output(ch);
+                        // }
+                        // if (flags.b) {
+                        //     b_flag(ch, previous, common_count);
+                        //     output(ch);
+                        // }
+                        // if (flags.e) {
+                        //     e_flag(ch);
+                        //     output(ch);
+                        // }
+                        // if (flags.v) {
+                        //     v_flag(ch);
+                        //     output(ch);
+                        // }
+                        previous = ch;
                     }
                     fclose(file);
                 }
@@ -117,10 +116,13 @@ void take_flag(char option, struct fields *flags) {
 
 void s_flag(char ch, char previous, int *raise) {
     if ((ch == '\n') && (previous == '\n')) {
-        *raise = 1;
-        if (ch != '\n') {
-            *raise = 0;
-        }
+        *raise += 1;
+    }
+    if (ch != '\n') {
+        *raise = 0;
+    }
+    if (*raise < 2) {
+        output(ch);
     }
 }
 
@@ -144,7 +146,7 @@ void b_flag(char ch, char previous, int *common_count) {
 
 void e_flag(char ch) {
     if (ch == '\n') {
-        printf('$');
+        printf("$");
     }
 }
 
