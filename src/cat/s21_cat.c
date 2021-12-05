@@ -20,22 +20,21 @@ struct fields {
     int s;
     int t;
     int v;
-    int sum;
 };
 
 void init_struct(struct fields *flags);
 void take_flag(char option, struct fields *flags);
 
-int s_flag(char ch, char previous, int *raise, int *PRINT);
+void s_flag(char ch, char previous, int *raise, int *PRINT);
 void n_flag(char ch, int *common_count, char previous);
-void t_flag(char ch);
+void t_flag(char ch, int *PRINT);
 void b_flag(char ch, char previous, int *common_count);
-void e_flag(char ch);
-void v_flag(char ch);
+void e_flag(char ch, int *PRINT);
+void v_flag(char ch, int *PRINT);
 void output(char ch);
 
 int main(int argc, char **argv) {
-    int option_index, option = 0, new = 1, raise = 0, PRINT = 1;
+    int option_index, option = 0, raise = 0, PRINT = YES;
     struct fields flags;
     char ch, previous = '\n';
     FILE *file;
@@ -59,22 +58,22 @@ int main(int argc, char **argv) {
                         if (flags.n && !flags.b) {
                             n_flag(ch, &common_count, previous);
                         }
-                        // if (flags.b) {
-                        //     b_flag(ch, previous, common_count);
-                        // }
-                        // if (flags.t) {
-                        //     t_flag(ch);
-                        // }
-                        // if (flags.e) {
-                        //     e_flag(ch);
-                        // }
-                        // if (flags.v) {
-                        //     v_flag(ch);
-                        // }
-                        previous = ch;
+                        if (flags.b) {
+                            b_flag(ch, previous, &common_count);
+                        }
+                        if (flags.t) {
+                            t_flag(ch, &PRINT);
+                        }
+                        if (flags.e) {
+                            e_flag(ch, &PRINT);
+                        }
+                        if (flags.v) {
+                            v_flag(ch, &PRINT);
+                        }
                         if (PRINT) {
                             putc(ch, stdout);
                         }
+                        previous = ch;
                     }
                     fclose(file);
                 }
@@ -91,7 +90,6 @@ void init_struct(struct fields *flags) {
     flags->s = 0;
     flags->t = 0;
     flags->v = 0;
-    flags->sum = 0;
 }
 
 void take_flag(char option, struct fields *flags) {
@@ -116,10 +114,9 @@ void take_flag(char option, struct fields *flags) {
     }
 }
 
-int s_flag(char ch, char previous, int *raise, int *PRINT) {
+void s_flag(char ch, char previous, int *raise, int *PRINT) {
     if ((ch == '\n') && (previous == '\n')) {
         *raise += 1;
-        // *PRINT = NO;
     }
     if (ch != '\n') {
         *raise = 0;
@@ -128,7 +125,6 @@ int s_flag(char ch, char previous, int *raise, int *PRINT) {
     if (*raise > 1) {
         *PRINT = NO;
     }
-    return *PRINT;
 }
 
 void n_flag(char ch, int *common_count, char previous) {
@@ -137,27 +133,31 @@ void n_flag(char ch, int *common_count, char previous) {
     }
 }
 
-void t_flag(char ch) {
+void t_flag(char ch, int *PRINT) {
     if (ch == '\t') {
         printf("^I");
-    }
+        *PRINT = NO;
+    } else
+        *PRINT = YES;
 }
 
 void b_flag(char ch, char previous, int *common_count) {
-    if (ch == '\n' && previous == '\n') {
-    } else
-        printf("%6d\t", *(++common_count));
-}
-
-void e_flag(char ch) {
-    if (ch == '\n') printf("$");
-}
-
-void v_flag(char ch) {
-    if (ch >= 0 && ch <= 31 && ch != ' ' && ch != '\n') {
-        printf("^");
-        printf("%c", ch + OFFSET_ASCII);
+    if (ch != '\n' && previous == '\n') {
+        printf("%6d\t", *common_count += 1);
     }
 }
 
-void output(char ch) { putc(ch, stdout); }
+void e_flag(char ch, int *PRINT) {
+    if (ch == '\n') {
+        printf("$");
+    }
+}
+
+void v_flag(char ch, int *PRINT) {
+    if (ch >= 0 && ch <= 31 && ch != '\n' && ch != '\t') {
+        printf("^%c", ch + OFFSET_ASCII);
+        *PRINT = NO;
+    } else {
+        *PRINT = YES;
+    }
+}
