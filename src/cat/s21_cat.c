@@ -119,7 +119,7 @@ void take_flag(char option, struct fields *flags) {
 int s_flag(char ch, char previous, int *raise, int *PRINT) {
     if ((ch == '\n') && (previous == '\n')) {
         *raise += 1;
-        *PRINT = NO;
+        // *PRINT = NO;
     }
     if (ch != '\n') {
         *raise = 0;
