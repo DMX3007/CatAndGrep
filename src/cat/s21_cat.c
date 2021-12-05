@@ -1,37 +1,4 @@
-#include <getopt.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#define OFFSET_ASCII 64
-#define YES 1
-#define NO 0
-
-static struct option long_option[] = {{"number-nonblank", 0, 0, 'b'},
-                                      {"number", 0, 0, 'n'},
-                                      {"squeeze-blank", 0, 0, 's'},
-                                      {0, 0, 0, 0}};
-
-struct fields {
-    int b;
-    int e;
-    int n;
-    int s;
-    int t;
-    int v;
-};
-
-void init_struct(struct fields *flags);
-void take_flag(char option, struct fields *flags);
-
-void s_flag(char ch, char previous, int *raise, int *PRINT);
-void n_flag(char ch, int *common_count, char previous);
-void t_flag(char ch, int *PRINT);
-void b_flag(char ch, char previous, int *common_count);
-void e_flag(char ch, int *PRINT);
-void v_flag(char ch, int *PRINT);
-void output(char ch);
+#include "s21_cat.h"
 
 int main(int argc, char **argv) {
     int option_index, option = 0, raise = 0, PRINT = YES;
@@ -49,14 +16,13 @@ int main(int argc, char **argv) {
             if ((strlen((*argv)) > 2) && (**(argv) != '-')) {
                 if ((file = fopen(*argv, "r")) == NULL) {
                     printf("s21_cat: %s: No such file or directory", *argv);
-                    fclose(file);
                 } else {
                     while ((ch = getc(file)) != EOF) {
                         if (flags.s) {
                             s_flag(ch, previous, &raise, &PRINT);
                         }
                         if (flags.n && !flags.b) {
-                            n_flag(ch, &common_count, previous);
+                            n_flag(&common_count, previous);
                         }
                         if (flags.b) {
                             b_flag(ch, previous, &common_count);
@@ -65,7 +31,7 @@ int main(int argc, char **argv) {
                             t_flag(ch, &PRINT);
                         }
                         if (flags.e) {
-                            e_flag(ch, &PRINT);
+                            e_flag(ch);
                         }
                         if (flags.v) {
                             v_flag(ch, &PRINT);
@@ -127,7 +93,7 @@ void s_flag(char ch, char previous, int *raise, int *PRINT) {
     }
 }
 
-void n_flag(char ch, int *common_count, char previous) {
+void n_flag(int *common_count, char previous) {
     if (previous == '\n') {
         printf("%6d\t", *common_count += 1);
     }
@@ -137,8 +103,9 @@ void t_flag(char ch, int *PRINT) {
     if (ch == '\t') {
         printf("^I");
         *PRINT = NO;
-    } else
+    } else {
         *PRINT = YES;
+    }
 }
 
 void b_flag(char ch, char previous, int *common_count) {
@@ -147,7 +114,7 @@ void b_flag(char ch, char previous, int *common_count) {
     }
 }
 
-void e_flag(char ch, int *PRINT) {
+void e_flag(char ch) {
     if (ch == '\n') {
         printf("$");
     }

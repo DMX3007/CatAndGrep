@@ -11,7 +11,7 @@ int main() {
         y = getc(secfile);
         if (x != y) {
             printf("this is number of sym that doesn't equal  - %d\n", i);
-            printf(" Should be %c\n", x);
+            printf(" Should be %c\n", x);  //
             printf(" We have %c\n", y);
         }
     }

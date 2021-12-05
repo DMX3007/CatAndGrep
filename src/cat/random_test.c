@@ -30,15 +30,19 @@ int main() {
 void generate_sequence(char* flags, char* buffer) {
     int i = rand() % 5;
     if (i <= 0) {
-        i = rand() % 10;
+        i = 5;
     }
-    for (int j = 0; j < i; j++, i--) {
-        buffer[j] = flags[i];
+    if (i == 0) {
+        i = 5;
+    }
+    for (int j = 0; j <= i; j++) {
+        int x = rand() % 5;
+        buffer[j] = flags[x];
     }
 }
 
 void take_new_flags(char* new_sequence_of_flags, char* buffer) {
-    int x = rand() % 5;
+    int x = 5;
     for (int i = 0; i < x; i++) {
         sprintf(new_sequence_of_flags, "%s", buffer);
     }
