@@ -1,7 +1,7 @@
 #include "s21_cat.h"
 
 int main(int argc, char **argv) {
-    int option_index, option = 0, raise = 0, PRINT = YES;
+    int option_index, option = 0, raise = 0, PRINT;
     struct fields flags;
     char ch, previous = '\n';
     FILE *file;
@@ -18,6 +18,7 @@ int main(int argc, char **argv) {
                     printf("s21_cat: %s: No such file or directory", *argv);
                 } else {
                     while ((ch = getc(file)) != EOF) {
+                        PRINT = YES;
                         if (flags.s) {
                             s_flag(ch, previous, &raise, &PRINT);
                         }
@@ -103,8 +104,6 @@ void t_flag(char ch, int *PRINT) {
     if (ch == '\t') {
         printf("^I");
         *PRINT = NO;
-    } else {
-        *PRINT = YES;
     }
 }
 
@@ -124,7 +123,5 @@ void v_flag(char ch, int *PRINT) {
     if (ch >= 0 && ch <= 31 && ch != '\n' && ch != '\t') {
         printf("^%c", ch + OFFSET_ASCII);
         *PRINT = NO;
-    } else {
-        *PRINT = YES;
     }
 }
