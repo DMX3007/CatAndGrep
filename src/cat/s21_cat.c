@@ -124,4 +124,12 @@ void v_flag(char ch, int *PRINT) {
         printf("^%c", ch + OFFSET_ASCII);
         *PRINT = NO;
     }
+    if (ch > 127 && ch <= 255) {
+        printf("M-%c", ch - OFFSET_ASCII);
+        *PRINT = NO;
+    }
+    if (ch == 127) {
+        printf("^?");
+        *PRINT = NO;
+    }
 }
