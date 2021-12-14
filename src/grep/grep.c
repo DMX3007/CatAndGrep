@@ -1,6 +1,7 @@
 #include <getopt.h>
 #include <pcre.h>
 #include <stdio.h>
+#include <string.h>
 
 #define YES 1
 #define NO 0
@@ -18,36 +19,53 @@ struct fields {
     int o;
 };
 
-void init_struct(struct fields *flags);
-void take_flag(char option, struct fields *flags);
+typedef struct linked_list {
+    char *data;
+    struct linked_list *next;
+} llist;
+
+void init_flags(struct fields *flags);
+void take_flag(char option, struct fields *flags, llist *p);
 void re_demption(char *pattern, char *str, int *r_value);
 
+struct linked_list *init_ll();
+struct linked_list *addelem(struct linked_list *node, char *text);
+void print_ll(struct linked_list *node);
+void loop(struct linked_list *temp, struct linked_list *head);
+struct linked_list *create_new_node(char *text);
+struct linked_list *add_in_end(struct linked_list *prev_node, char *text);
+void getopting(int option, int first_call, int argc, char **argv,
+               llist *patterns, struct fields *flags);
+
 int main(int argc, char *argv[]) {
-    char pattern[4096] = {'\0'}, *str = NULL;
+    int option = 0, flag = 0, i = 0, first = 1;
+    char *str = malloc(sizeof(char)), *pattern = malloc(sizeof(char));
     size_t len = 0;
     ssize_t nread;
-    int option = 0, flag = 0;
     struct fields flags;
+    llist *patterns;
     FILE *file;
-    while (((option = getopt_long(argc, argv, "e:i:v:c:l:n:h:f:s:o:", 0, 0)) !=
-            -1)) {
-        take_flag(option, &flags);
-    }
-    for (int i = 0; argv++ && (i < argc - 1); i++) {
-        if ((strlen((*argv)) > 2) && (**(argv) != '-')) {
-            if ((file = fopen(*argv, "r")) == NULL) {
-                continue;
-            } else {
-                while ((getline(&str, len, file)) != -1) {
-                    re_demption(pattern, str, &flag);
-                }
+
+    init_flags(&flags);
+    // printf("\n");
+    // print_ll(patterns);
+
+    getopting(patterns, first, argc, argv, patterns, &flags);
+
+    while (argv) {
+        if ((file = fopen(argv[i], "r")) == NULL) {
+            i++;
+        } else {
+            while ((getline(&str, &len, file)) != -1) {
+                printf("after deleting this - %s\n", argv[i]);
+                re_demption(pattern, str, &flag);
             }
         }
     }
     return 0;
 }
 
-void init_struct(struct fields *flags) {
+void init_flags(struct fields *flags) {
     flags->v = 0;
     flags->e = 0;
     flags->i = 0;
@@ -61,11 +79,12 @@ void init_struct(struct fields *flags) {
     flags->o = 0;
 }
 
-void take_flag(char option, struct fields *flags) {
+void take_flag(char option, struct fields *flags, llist *p) {
     if (option == 'v') {
         flags->v = option;
     } else if (option == 'e') {
         flags->e = option;
+        p = addelem(p, optarg);
     } else if (option == 'n') {
         flags->n = option;
     } else if (option == 's') {
@@ -109,5 +128,46 @@ void re_demption(char *pattern, char *str, int *r_value) {
                 }
             }
         }
+    }
+}
+
+struct linked_list *init_ll() {
+    llist *head;
+    head = malloc(sizeof(llist));
+    // head->data = calloc(strlen(text_or_file), sizeof(char));
+    head->data = NULL;
+    head->next = NULL;
+    return head;
+}
+
+struct linked_list *addelem(struct linked_list *node, char *text) {
+    llist *new_node, *p;
+    new_node = malloc(sizeof(llist));
+    p = node->next;
+    node->next = new_node;
+    new_node->data = text;
+    new_node->next = p;
+    return new_node;
+}
+
+void print_ll(struct linked_list *node) {
+    llist *temp = node;
+    while (temp != NULL) {
+        printf("%s\n", temp->data);
+        temp = temp->next;
+    }
+}
+
+void getopting(int option, int first_call, int argc, char **argv,
+               llist *patterns, struct fields *flags) {
+    int i = 0;
+    while (((option = getopt_long(argc, argv, "e:ivclnhf:so", 0, 0)) != -1)) {
+        if (first_call) {
+            patterns = init_ll();
+            first_call--;
+        }
+        take_flag(option, flags, patterns);
+        // memset(argv[i], '\0', strlen(argv[i]));
+        i++;
     }
 }
