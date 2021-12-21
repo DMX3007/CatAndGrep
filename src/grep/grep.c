@@ -120,15 +120,15 @@ void getopting(int argc, char** argv, struct flags *flag, llist *head, llist *ne
     }
 }
 
-int re_demption(char *str, char *pattern) { // HERE SHOULD BE STRING
+int re_demption(char *str, char *pattern) {
     int result = YES;
     regex_t re;
     while (result != 0) {
         regcomp(&re, pattern, 0);
         result = regexec(&re, str, (size_t)0, NULL, 0);
 #ifdef T1
-        printf("this is string from re_demption - %s\n", str);
-        printf("this is result - %d\n", result);
+        printf("\nthis is string from re_demption - %s", str);
+        printf("\tthis is result - %d\n", result);
 #endif // T1
         if(result == YES)
         break;
@@ -138,27 +138,42 @@ int re_demption(char *str, char *pattern) { // HERE SHOULD BE STRING
     return NO;
 }
 
+void printing(char *str) {
+    printf("%s", str);
+}
+
 int main (int argc, char**argv) {
     struct flags flag;
     llist *new_node = malloc(sizeof(llist));
     llist *head = malloc(sizeof(llist));
+    llist *temp;
     FILE *file;
     regex_t re;
-    int status = -1;
+    int status = -1, counter = 0;
     char *str = NULL;
     size_t size = 0;
     init_flags(&flag);
     getopting(argc, argv, &flag, head, new_node);
+    counter = optind;
     do {
-        file = fopen(argv[optind], "r");
-        while ((getline(&str, &size, file)) != -1) {
-            status = re_demption(str, pattern);
-        }
+        if((file = fopen(argv[counter], "r")) != NULL) {
+#ifdef T1
+        printf("current file - %s", argv[counter]);
+#endif
+            while ((getline(&str, &size, file)) != -1) {
+                temp = head;
+                while (temp != NULL) {
+                    status = re_demption(str, temp->data);
+                    temp = temp->next;
+                }
+            }
         fclose(file);
-        free(str);
-        optind++;
-    } while (optind != argc - 1);
+        counter++;
+        }
+        else counter++;
+    } while (counter != argc);
 
+free(str);
 #ifdef T1
     printf("status = %d\n", status);
     print_ll(head);
