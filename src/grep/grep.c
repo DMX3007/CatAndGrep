@@ -4,6 +4,9 @@
 #include <regex.h>
 #include <string.h>
 
+#define YES 1
+#define NO 0
+
 struct linked_list {
     char *data;
     struct linked_list *next;
@@ -117,29 +120,50 @@ void getopting(int argc, char** argv, struct flags *flag, llist *head, llist *ne
     }
 }
 
-// int re_demption() { // HERE SHOULD BE STRING
-//     int result = 0;
-//     regex_t re;
-//     regcomp(&re, optarg, 0);
-//     result = regexec(&re, string, (size_t)0, NULL, 0);
-//     regfree(&re);
-//     if(result != 0) return 0;
-//     return 1;
-// }
+int re_demption(char *str, char *pattern) { // HERE SHOULD BE STRING
+    int result = YES;
+    regex_t re;
+    while (result != 0) {
+        regcomp(&re, pattern, 0);
+        result = regexec(&re, str, (size_t)0, NULL, 0);
+#ifdef T1
+        printf("this is string from re_demption - %s\n", str);
+        printf("this is result - %d\n", result);
+#endif // T1
+        if(result == YES)
+        break;
+    }
+    regfree(&re);
+    if(result != NO) return YES;
+    return NO;
+}
 
 int main (int argc, char**argv) {
     struct flags flag;
     llist *new_node = malloc(sizeof(llist));
     llist *head = malloc(sizeof(llist));
-    // regex_t re;
-    // int status = 0;
+    FILE *file;
+    regex_t re;
+    int status = -1;
+    char *str = NULL;
+    size_t size = 0;
     init_flags(&flag);
     getopting(argc, argv, &flag, head, new_node);
+    do {
+        file = fopen(argv[optind], "r");
+        while ((getline(&str, &size, file)) != -1) {
+            status = re_demption(str, pattern);
+        }
+        fclose(file);
+        free(str);
+        optind++;
+    } while (optind != argc - 1);
+
 #ifdef T1
+    printf("status = %d\n", status);
     print_ll(head);
     printf("\ne - %d\nf - %d\ni - %d\nv - %d\nc - %d\nl - %d\nn - %d\nh - %d\ns - %d\no - %d\n", flag.e,flag.f,flag.i,flag.v,flag.c,flag.l,flag.n,flag.h,flag.s,flag.o);
 #endif  //T1
 
     return 0;
-
 }
