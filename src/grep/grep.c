@@ -120,10 +120,13 @@ void getopting(int argc, char** argv, struct flags *flag, llist *head, llist *ne
     }
 }
 
-int re_demption(char *str, char *pattern) {
+int re_demption(char *str, char *pattern, struct flags *flag) {
     int result = -1;
     regex_t re;
-        regcomp(&re, pattern, 0);
+        if(flag->i) regcomp(&re, pattern, REG_ICASE);
+        else {
+            regcomp(&re, pattern, 0);
+        }
         result = regexec(&re, str, (size_t)0, NULL, 0);
 #ifdef T1
         printf("\nthis is string from re_demption - %s", str);
@@ -138,13 +141,32 @@ void printing(char *str) {
     printf("%s", str);
 }
 
+void processing (char *str, FILE *file, llist *head, struct flags *flag) {
+    size_t size = 0;
+    llist *temp;
+    while ((getline(&str, &size, file)) != -1) {
+        temp = head;
+        int status = -1;
+        while (temp != NULL) {
+            status = re_demption(str, temp->data, flag);
+            if(status == MATCH && !(flag->v)) {
+                printing(str);
+                break;
+            }
+            if(status == NO_MATCH) {
+                if(flag->v) printing(str);
+                temp = temp->next;
+            }
+        }
+    }
+}
+
 int main (int argc, char**argv) {
     struct flags flag;
-    llist *new_node = malloc(sizeof(llist)), *head = malloc(sizeof(llist)), *temp;
+    llist *new_node = malloc(sizeof(llist)), *head = malloc(sizeof(llist));
     FILE *file;
     int counter = 0;
     char *str = NULL;
-    size_t size = 0;
     init_flags(&flag);
     getopting(argc, argv, &flag, head, new_node);
     counter = optind;
@@ -153,18 +175,7 @@ int main (int argc, char**argv) {
 #ifdef T1
         printf("current file - %s", argv[counter]);
 #endif
-            while ((getline(&str, &size, file)) != -1) {
-                temp = head;
-                int status = -1;
-                while (temp != NULL) {
-                    status = re_demption(str, temp->data);
-                    if(status == MATCH) {
-                        printing(str);
-                        break;
-                    }
-                    if(status == NO_MATCH) temp = temp->next;
-                }
-            }
+        processing(str, file, head, &flag);
         fclose(file);
         counter++;
         }
