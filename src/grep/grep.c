@@ -4,8 +4,8 @@
 #include <regex.h>
 #include <string.h>
 
-#define YES 1
-#define NO 0
+#define MATCH 0
+#define NO_MATCH 1
 
 struct linked_list {
     char *data;
@@ -121,21 +121,17 @@ void getopting(int argc, char** argv, struct flags *flag, llist *head, llist *ne
 }
 
 int re_demption(char *str, char *pattern) {
-    int result = YES;
+    int result = -1;
     regex_t re;
-    while (result != 0) {
         regcomp(&re, pattern, 0);
         result = regexec(&re, str, (size_t)0, NULL, 0);
 #ifdef T1
         printf("\nthis is string from re_demption - %s", str);
         printf("\tthis is result - %d\n", result);
 #endif // T1
-        if(result == YES)
-        break;
-    }
     regfree(&re);
-    if(result != NO) return YES;
-    return NO;
+    if(result != MATCH) return NO_MATCH;
+    return MATCH;
 }
 
 void printing(char *str) {
@@ -144,12 +140,9 @@ void printing(char *str) {
 
 int main (int argc, char**argv) {
     struct flags flag;
-    llist *new_node = malloc(sizeof(llist));
-    llist *head = malloc(sizeof(llist));
-    llist *temp;
+    llist *new_node = malloc(sizeof(llist)), *head = malloc(sizeof(llist)), *temp;
     FILE *file;
-    regex_t re;
-    int status = -1, counter = 0;
+    int counter = 0;
     char *str = NULL;
     size_t size = 0;
     init_flags(&flag);
@@ -162,9 +155,14 @@ int main (int argc, char**argv) {
 #endif
             while ((getline(&str, &size, file)) != -1) {
                 temp = head;
+                int status = -1;
                 while (temp != NULL) {
                     status = re_demption(str, temp->data);
-                    temp = temp->next;
+                    if(status == MATCH) {
+                        printing(str);
+                        break;
+                    }
+                    if(status == NO_MATCH) temp = temp->next;
                 }
             }
         fclose(file);
