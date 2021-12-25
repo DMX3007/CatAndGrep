@@ -51,6 +51,27 @@ struct flags {
     int o;
 };
 
+void take_patterns (int option, llist *head, llist *new_node, struct flags *flag, char **argv) {
+    static llist *temp;
+    if (option == 'e') {
+    flag->e += option;
+        if(flag->e == 'e') head = init_ll(optarg, head);
+        else {
+            if(flag->e == 'e' * 2) {
+            new_node = head;
+            new_node = addelem(new_node, optarg);
+            temp = new_node;
+            }
+            else {
+                temp = addelem(temp, optarg);
+            }
+        }
+    }
+    else {
+        head = init_ll(argv[optind], head);
+    }
+}
+
 void init_flags(struct flags *flag) {
     flag->e = 0;
     flag->f = 0;
@@ -64,22 +85,10 @@ void init_flags(struct flags *flag) {
     flag->o = 0;
 }
 
-void take_flags(int option, struct flags *flag, llist *head, llist *new_node) {
-    static llist *temp;
+void take_flags(int option, struct flags *flag, llist *head, llist *new_node, char **argv) {
     switch(option) {
         case 'e':
-            flag->e += option;
-        if(flag->e == 'e') head = init_ll(optarg, head);
-        else {
-            if(flag->e == 'e' * 2) {
-            new_node = head;
-            new_node = addelem(new_node, optarg);
-            temp = new_node;
-            }
-            else {
-                temp = addelem(temp, optarg);
-            }
-        }
+        take_patterns(option, head, new_node, flag, argv);
         break;
         case 'f':
         flag->f = option;
@@ -116,7 +125,10 @@ void take_flags(int option, struct flags *flag, llist *head, llist *new_node) {
 void getopting(int argc, char** argv, struct flags *flag, llist *head, llist *new_node) {
     int option = 0;
     while((option = getopt_long(argc,argv, "e:f:ivclnhso", 0 , 0)) != -1) {
-        take_flags(option ,flag, head, new_node);
+        take_flags(option ,flag, head, new_node, argv);
+        if(!flag->e) {
+            take_patterns(option, head, new_node, flag, argv);
+        }
     }
 }
 
@@ -137,12 +149,14 @@ int re_demption(char *str, char *pattern, struct flags *flag) {
     return MATCH;
 }
 
-void printing(char *str) {
-    printf("%s", str);
+void printing(char *str, struct flags *flag) {
+    if(flag->e || flag->i || flag->v) {
+        printf("%s", str);
+    }
 }
 
-void processing (char *str, FILE *file, llist *head, struct flags *flag) {
-    size_t size = 0;
+int processing (char *str, FILE *file, llist *head, struct flags *flag) {
+    size_t size = 0, r_val = 0;
     llist *temp;
     while ((getline(&str, &size, file)) != -1) {
         temp = head;
@@ -150,14 +164,29 @@ void processing (char *str, FILE *file, llist *head, struct flags *flag) {
         while (temp != NULL) {
             status = re_demption(str, temp->data, flag);
             if(status == MATCH && !(flag->v)) {
-                printing(str);
+                printing(str, flag);
+                r_val += 1;
                 break;
             }
-            if(status == NO_MATCH) {
-                if(flag->v) printing(str);
-                temp = temp->next;
+            if(status == NO_MATCH || flag->v) {
+                if((status == NO_MATCH) && (flag->v)) {
+                    printing(str, flag);
+                    r_val += 1;
+                    break;
+                } else {
+                    temp = temp->next;
+                }
             }
         }
+    }
+    return r_val;
+}
+
+void add_nl_orc(int new_line, struct flags *flag) {
+    if(new_line || flag->c) {
+        if (flag->c) {
+            printf("%u\n", new_line);
+        }printf("\n");
     }
 }
 
@@ -165,7 +194,7 @@ int main (int argc, char**argv) {
     struct flags flag;
     llist *new_node = malloc(sizeof(llist)), *head = malloc(sizeof(llist));
     FILE *file;
-    int counter = 0;
+    int counter = 0, new_line = 0;
     char *str = NULL;
     init_flags(&flag);
     getopting(argc, argv, &flag, head, new_node);
@@ -175,16 +204,16 @@ int main (int argc, char**argv) {
 #ifdef T1
         printf("current file - %s", argv[counter]);
 #endif
-        processing(str, file, head, &flag);
+        new_line += processing(str, file, head, &flag);
         fclose(file);
         counter++;
         }
         else counter++;
     } while (counter != argc);
-
-free(str);
+    
+    add_nl_orc(new_line, &flag);
+    free(str);
 #ifdef T1
-    printf("status = %d\n", status);
     print_ll(head);
     printf("\ne - %d\nf - %d\ni - %d\nv - %d\nc - %d\nl - %d\nn - %d\nh - %d\ns - %d\no - %d\n", flag.e,flag.f,flag.i,flag.v,flag.c,flag.l,flag.n,flag.h,flag.s,flag.o);
 #endif  //T1
