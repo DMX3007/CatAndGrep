@@ -155,22 +155,31 @@ void printing(char *str, struct flags *flag) {
     }
 }
 
+void add_nl(int lenght) {
+    if(lenght != -1) {
+        printf("\n");
+    }
+}
+
 int processing (char *str, FILE *file, llist *head, struct flags *flag) {
     size_t size = 0, r_val = 0;
+    int lenght = 0, len = -1;
     llist *temp;
-    while ((getline(&str, &size, file)) != -1) {
+    while ((lenght = getline(&str, &size, file)) != -1) {
         temp = head;
         int status = -1;
         while (temp != NULL) {
             status = re_demption(str, temp->data, flag);
             if(status == MATCH && !(flag->v)) {
                 printing(str, flag);
+                if (!(strchr(str, '\n'))) len = lenght;
                 r_val += 1;
                 break;
             }
             if(status == NO_MATCH || flag->v) {
                 if((status == NO_MATCH) && (flag->v)) {
                     printing(str, flag);
+                    if (!(strchr(str, '\n'))) len = lenght;
                     r_val += 1;
                     break;
                 } else {
@@ -179,16 +188,14 @@ int processing (char *str, FILE *file, llist *head, struct flags *flag) {
             }
         }
     }
+    add_nl(len);
     return r_val;
 }
 
-void add_nl_orc(int new_line, struct flags *flag) {
-    if(new_line || flag->c) {
-        if (flag->c) {
-            printf("%u\n", new_line);
-        }printf("\n");
-    }
+void add_c(int new_line, struct flags *flag) {
+    if (flag->c) printf("%u\n", new_line);
 }
+
 
 int main (int argc, char**argv) {
     struct flags flag;
@@ -210,8 +217,7 @@ int main (int argc, char**argv) {
         }
         else counter++;
     } while (counter != argc);
-    
-    add_nl_orc(new_line, &flag);
+    add_c(new_line, &flag);
     free(str);
 #ifdef T1
     print_ll(head);
