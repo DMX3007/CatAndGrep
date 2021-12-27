@@ -196,7 +196,6 @@ void add_c(int new_line, struct flags *flag) {
     if (flag->c) printf("%u\n", new_line);
 }
 
-
 int main (int argc, char**argv) {
     struct flags flag;
     llist *new_node = malloc(sizeof(llist)), *head = malloc(sizeof(llist));
@@ -208,10 +207,12 @@ int main (int argc, char**argv) {
     counter = optind;
     do {
         if((file = fopen(argv[counter], "r")) != NULL) {
+        int temp = 0;
 #ifdef T1
         printf("current file - %s", argv[counter]);
 #endif
         new_line += processing(str, file, head, &flag);
+        if ((new_line != temp) && (flag.l)) printf("%s\n", argv[counter]);
         fclose(file);
         counter++;
         }
