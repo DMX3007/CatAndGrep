@@ -38,6 +38,14 @@ void print_ll(llist *node) {
     }
 }
 
+void freeList(llist *head) {
+    llist *temp = head;
+    while (temp != NULL) {
+        free(temp);
+        temp = temp->next;
+    }
+}
+
 struct flags {
     int e;
     int f;
@@ -49,6 +57,7 @@ struct flags {
     int h;
     int s;
     int o;
+    int fn;
 };
 
 void take_patterns (int option, llist *head, llist *new_node, struct flags *flag, char **argv) {
@@ -83,6 +92,7 @@ void init_flags(struct flags *flag) {
     flag->h = 0;
     flag->s = 0;
     flag->o = 0;
+    flag->fn = 0;
 }
 
 void take_flags(int option, struct flags *flag, llist *head, llist *new_node, char **argv) {
@@ -149,9 +159,12 @@ int re_demption(char *str, char *pattern, struct flags *flag) {
     return MATCH;
 }
 
-void printing(char *str, struct flags *flag) {
+void printing(char **argv,int counter, int temp, int r_val, char *str, struct flags *flag) {
+    if(flag->fn) printf("%s:", argv[counter]);
     if((flag->e || flag->i || flag->v) && (!flag->l)) {
         printf("%s", str);
+    } else if ((r_val != temp) && (flag->l)) {
+        printf("%s\n", argv[counter]);
     }
 }
 
@@ -161,7 +174,7 @@ void add_nl(int lenght, struct flags *flag) {
     }
 }
 
-int processing (char *str, FILE *file, llist *head, struct flags *flag) {
+int processing (char *str, FILE *file, llist *head, struct flags *flag, char **argv, int counter, int tmp) {
     size_t size = 0, r_val = 0;
     int lenght = 0, len = -1;
     llist *temp;
@@ -171,16 +184,16 @@ int processing (char *str, FILE *file, llist *head, struct flags *flag) {
         while (temp != NULL) {
             status = re_demption(str, temp->data, flag);
             if(status == MATCH && !(flag->v)) {
-                printing(str, flag);
-                if (!(strchr(str, '\n'))) len = lenght;
                 r_val += 1;
+                printing(argv, counter, tmp, r_val, str, flag);
+                if (!(strchr(str, '\n'))) len = lenght;
                 break;
             }
             if(status == NO_MATCH || flag->v) {
                 if((status == NO_MATCH) && (flag->v)) {
-                    printing(str, flag);
-                    if (!(strchr(str, '\n'))) len = lenght;
                     r_val += 1;
+                    printing(argv, counter, tmp, r_val, str, flag);
+                    if (!(strchr(str, '\n'))) len = lenght;
                     break;
                 } else {
                     temp = temp->next;
@@ -205,14 +218,15 @@ int main (int argc, char**argv) {
     init_flags(&flag);
     getopting(argc, argv, &flag, head, new_node);
     counter = optind;
+    if ((argc - counter) > 1) flag.fn = 1;
     do {
         if((file = fopen(argv[counter], "r")) != NULL) {
-        int temp = 0;
+        static int temp = 0;
 #ifdef T1
         printf("current file - %s", argv[counter]);
 #endif
-        new_line += processing(str, file, head, &flag);
-        if ((new_line != temp) && (flag.l)) printf("%s\n", argv[counter]);
+        new_line += processing(str, file, head, &flag, argv, counter, temp);
+        temp = new_line;
         fclose(file);
         counter++;
         }
@@ -220,10 +234,10 @@ int main (int argc, char**argv) {
     } while (counter != argc);
     add_c(new_line, &flag);
     free(str);
+    freeList(head);
 #ifdef T1
     print_ll(head);
     printf("\ne - %d\nf - %d\ni - %d\nv - %d\nc - %d\nl - %d\nn - %d\nh - %d\ns - %d\no - %d\n", flag.e,flag.f,flag.i,flag.v,flag.c,flag.l,flag.n,flag.h,flag.s,flag.o);
 #endif  //T1
-
     return 0;
 }
