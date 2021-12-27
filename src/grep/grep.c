@@ -150,13 +150,13 @@ int re_demption(char *str, char *pattern, struct flags *flag) {
 }
 
 void printing(char *str, struct flags *flag) {
-    if(flag->e || flag->i || flag->v) {
+    if((flag->e || flag->i || flag->v) && (!flag->l)) {
         printf("%s", str);
     }
 }
 
-void add_nl(int lenght) {
-    if(lenght != -1) {
+void add_nl(int lenght, struct flags *flag) {
+    if(lenght != -1 && (!flag->l)) {
         printf("\n");
     }
 }
@@ -188,7 +188,7 @@ int processing (char *str, FILE *file, llist *head, struct flags *flag) {
             }
         }
     }
-    add_nl(len);
+    add_nl(len, flag);
     return r_val;
 }
 
