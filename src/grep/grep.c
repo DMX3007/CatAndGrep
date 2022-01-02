@@ -160,7 +160,11 @@ int re_demption(char *str, char *pattern, struct flags *flag) {
 }
 
 void printing(char **argv,int counter, int temp, int r_val, char *str, struct flags *flag) {
-    if(flag->fn) printf("%s:", argv[counter]);
+    static int num = 0;
+    if(flag->fn && num != counter) {
+        printf("%s:", argv[counter]);
+        num = counter;
+    }
     if((flag->e || flag->i || flag->v) && (!flag->l)) {
         printf("%s", str);
     } else if ((r_val != temp) && (flag->l)) {
