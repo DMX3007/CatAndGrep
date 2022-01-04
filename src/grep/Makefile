@@ -1,7 +1,7 @@
 CC = gcc
 FLAGS = -g -Wall -Wextra -Werror
 
-all: grep
+all: clean grep test2
 
 grep: grep.o
 	$(CC) $(FLAGS) $^ -o $@
@@ -9,17 +9,9 @@ grep: grep.o
 grep.o: grep.c
 	$(CC) -c $(FLAGS) $^ -o $@
 
-testing: testing.o
-	$(CC) -c $(FLAGS) $^ -o $@
-
-testing.o: testing.c
-	$(CC) -c $(FLAGS) $^ -o $@
-
-test: grep_test.o
-	$(CC) -g $^ -o $@ -D T1
-
-grep_test.o: grep.c
-	$(CC) -g -c $^ -o $@ -D T1
+test2:
+	chmod +x script.sh
+	./script.sh
 
 clean:
-	rm -rf grep a.out test grep.o grep_test.o
+	rm -f grep a.out grep.o grep_test.o test/test_grep
