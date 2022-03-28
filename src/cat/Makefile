@@ -1,19 +1,17 @@
 CC = gcc
 FLAGS = -Werror -Wextra -Wall
 
-all: s21_cat
+all: mycat test
 
-s21_cat: s21_cat.o
+mycat: mycat.o
 	$(CC) $(FLAGS) $< -o $@
 
-s21_cat.o: s21_cat.c
+mycat.o: mycat.c
 	$(CC) -c $(FLAGS) $< -o $@
-
 check:
 	cppcheck *.h *.c
-	python3 ../../materials/linters/cpplint.py --extension=c *.c *.h
-	CK_FORK=no leaks --atExit -- ./s21_cat
-
+test:
+	./script.sh
 clean:
 	rm -rf *.o
 	
