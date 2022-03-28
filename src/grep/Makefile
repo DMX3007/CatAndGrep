@@ -1,11 +1,11 @@
 CC = gcc -std=c11
 FLAGS = -g -Wall -Wextra -Werror #-fsanitize=address -fsanitize=leak
-all: clean s21_grep
+all: clean mygrep
 
-s21_grep: s21_grep.o
+mygrep: mygrep.o
 	$(CC) $(FLAGS) $^ -o $@
 
-s21_grep.o: s21_grep.c
+mygrep.o: mygrep.c
 	$(CC) -c $(FLAGS) $^ -o $@
 
 test:
@@ -19,4 +19,4 @@ check:
 #	CK_FORK=no leaks --atExit -- ./s21_grep
 
 clean:
-	rm -rf s21_grep a.out s21_grep.o test_grep.o test_grep test text flags pattern myoutput.txt stand_out.txt
+	rm -rf mygrep a.out mygrep.o test_grep.o test_grep test text flags pattern myoutput.txt stand_out.txt
