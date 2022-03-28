@@ -15,8 +15,8 @@ check:
 	cppcheck *.h *.c
 	cp ../../materials/linters/CPPLINT.cfg CPPLINT.cfg
 	python3 ../../materials/linters/cpplint.py --extension=c *.c *.h
-#	valgrind -s --verbose --show-leak-kinds=all --leak-check=full ./s21_grep -e d -e 3 -e s text
-#	CK_FORK=no leaks --atExit -- ./s21_grep
+#	valgrind -s --verbose --show-leak-kinds=all --leak-check=full ./mygrep -e d -e 3 -e s text
+#	CK_FORK=no leaks --atExit -- ./mygrep
 
 clean:
 	rm -rf mygrep a.out mygrep.o test_grep.o test_grep test text flags pattern myoutput.txt stand_out.txt
