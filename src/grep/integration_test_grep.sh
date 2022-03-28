@@ -17,7 +17,7 @@ func() {
     pat="$(cat pattern)"
     echo "TEST#$i FLAGS:($fl) PATTERN:($pat)"
 grep -$fl $pat text > stand_out.txt
-./s21_grep -$fl $pat text > myoutput.txt
+./mygrep -$fl $pat text > myoutput.txt
 ((++i))
 diff stand_out.txt myoutput.txt
 if [ $? = 0 ]
